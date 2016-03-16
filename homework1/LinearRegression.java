@@ -36,8 +36,13 @@ public class LinearRegression extends Classifier{
 	 * @return
 	 * @throws Exception
 	 */
-	public double[] gradientDescent(Instances trainingData)
-			throws Exception {
+	public double[] gradientDescent(Instances trainingData) throws Exception {
+		double[] tetas = new double[m_truNumAttributes + 1];
+		for(int i = 0; i < tetas.length; i++) {
+			tetas[i] = 1;
+		}
+		
+		
 		return null;
 	}
 	

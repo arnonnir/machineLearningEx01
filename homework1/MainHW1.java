@@ -58,7 +58,7 @@ public class MainHW1 {
 
 		Instances data = new Instances(datafile);
 		data.setClassIndex(data.numAttributes() - 1);
-		 return data;
+		return data;
 	}
 	
 	public static void main(String[] args) throws Exception {
