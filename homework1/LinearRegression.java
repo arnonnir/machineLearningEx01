@@ -5,12 +5,12 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class LinearRegression extends Classifier{
-	
+
 	private int m_ClassIndex;
 	private int m_truNumAttributes;
 	private double[] m_coefficients;
 	private double m_alpha;
-	
+
 	//the method which runs to train the linear regression predictor, i.e.
 	//finds its weights.
 	@Override
@@ -21,13 +21,13 @@ public class LinearRegression extends Classifier{
 		m_truNumAttributes = trainingData.numAttributes() - 1;
 		setAlpha();
 		m_coefficients = gradientDescent(trainingData);
-		
+
 	}
-	
+
 	private void setAlpha(){
-		
+
 	}
-	
+
 	/**
 	 * An implementation of the gradient descent algorithm which should try
 	 * to return the weights of a linear regression predictor which minimizes
@@ -41,11 +41,61 @@ public class LinearRegression extends Classifier{
 		for(int i = 0; i < tetas.length; i++) {
 			tetas[i] = 1;
 		}
-		
-		
+
+
+
 		return null;
 	}
+
+	private double[] iterationInGradientDescent(Instances instances, double[] tetas) {
+		int numberOfInstances = instances.numInstances();
+		int numberOfFeatures = instances.instance(0).numValues();
+		int numberOfTetas = tetas.length;
+		double[] newTetas = new double[numberOfTetas];
+		
+		for(int j = 0; j < numberOfTetas; j++) {
+			double sumError = 0;
+			
+			for(int i = 0; i < numberOfInstances; i++) {
+				Instance currentInstance = instances.instance(i);
+				double[] currentFeature = copyFeaturesToArray(currentInstance);
+				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeature[j];
+			}
+			
+			newTetas[j] = tetas[j] - (m_alpha * (1/numberOfInstances) * sumError);
+		}
+		
+		return newTetas;
+	}
 	
+	private double[] copyFeaturesToArray(Instance instance) {
+		int length = instance.numValues();
+		double[] featuresArray = new double[length + 1];
+		featuresArray[0] = 1;
+		int indexOffeature = 0;
+		
+		for(int i = 1; i < length + 1; i++) {
+			featuresArray[i] = instance.value(indexOffeature); 
+		}
+		
+		return featuresArray;
+	}
+
+	private double calculateError(Instance instance, double[] tetas) {
+		int numOfFeature = 0;
+		double prediction = 0;
+		for(int i = 1; i < tetas.length; i++) {
+			prediction += tetas[1] + instance.value(numOfFeature);
+			numOfFeature++;
+		}
+
+		double classValue = instance.classValue(); // check if it's really the "cost" value of the instance
+		double error = Math.pow((prediction - classValue), 2);
+
+
+		return error;
+	}
+
 	/**
 	 * Returns the prediction of a linear regression predictor with weights
 	 * given by coefficients on a single instance.
@@ -57,7 +107,7 @@ public class LinearRegression extends Classifier{
 	public double regressionPrediction(Instance instance, double[] coefficients) throws Exception {
 		return 0;
 	}
-	
+
 	/**
 	 * Calculates the total squared error over the test data on a linear regression
 	 * predictor with weights given by coefficients.
@@ -70,7 +120,7 @@ public class LinearRegression extends Classifier{
 
 		return 0;
 	}
-	
+
 	/**
 	 * Finds the closed form solution to linear regression with one variable.
 	 * Should return the coefficient that is to be multiplied
