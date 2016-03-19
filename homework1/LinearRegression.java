@@ -26,26 +26,25 @@ public class LinearRegression extends Classifier{
 
 	private void setAlpha(Instances trainingData){
 		int numberOfInstances = trainingData.numInstances();
-		double[] tetas = new double[m_truNumAttributes + 1];
-		
-		for(int i = 0; i < tetas.length; i++) {
-			tetas[i] = 1;
-		}
 		
 		int powerOfError = -17;
 		double minError = Double.MAX_VALUE;
 		
 		for(int i = -17; i < 2; i++) {
-			
-			double alpha = Math.pow(3, i);
+			double[] tetas = initialTetasArray();
+			m_alpha = Math.pow(3, i);
 			double error = 0;
 			
 			for(int j = 0; j < 20000; j++) {
-				for(int k = 0; k < numberOfInstances; k++) {
-					Instance currentInstance = trainingData.instance(k);
-					error += calculateError(currentInstance, tetas);
-				}
+				tetas = iterationInGradientDescent(trainingData, tetas);
 			}
+			
+			for(int k = 0; k < numberOfInstances; k++) {
+				Instance currentInstance = trainingData.instance(k);
+				error += calculateError(currentInstance, tetas);
+			}
+			
+			error = (1 / (2 * numberOfInstances)) * error;
 			
 			if(error < minError) {
 				minError = error;
@@ -54,6 +53,16 @@ public class LinearRegression extends Classifier{
 		}
 		
 		m_alpha = Math.pow(3, powerOfError);
+	}
+	
+	private double[] initialTetasArray() {
+		double[] tetas = new double[m_truNumAttributes + 1];
+		
+		for(int i = 0; i < tetas.length; i++) {
+			tetas[i] = 1;
+		}
+		
+		return tetas;
 	}
 
 	/**
@@ -140,7 +149,7 @@ public class LinearRegression extends Classifier{
 		int numOfFeature = 0;
 		double prediction = 0;
 		for(int i = 1; i < tetas.length; i++) {
-			prediction += tetas[1] + instance.value(numOfFeature);
+			prediction += tetas[i] + instance.value(numOfFeature);
 			numOfFeature++;
 		}
 
