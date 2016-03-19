@@ -8,7 +8,7 @@ public class LinearRegression extends Classifier{
 
 	private int m_ClassIndex;
 	private int m_truNumAttributes;
-	private double[] m_coefficients;
+	public double[] m_coefficients;
 	private double m_alpha;
 
 	//the method which runs to train the linear regression predictor, i.e.
@@ -125,8 +125,8 @@ public class LinearRegression extends Classifier{
 				double[] currentFeatures = copyFeaturesToArray(currentInstance);
 				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j];
 			}
-			
-			newTetas[j] = tetas[j] - (m_alpha * (1/numberOfInstances) * sumError);
+			float e = (float)(m_alpha * (1/numberOfInstances) * sumError);
+			newTetas[j] = tetas[j] - e;
 		}
 		
 		return newTetas;
@@ -140,6 +140,7 @@ public class LinearRegression extends Classifier{
 		
 		for(int i = 1; i < length + 1; i++) {
 			featuresArray[i] = instance.value(indexOffeature); 
+			indexOffeature++;
 		}
 		
 		return featuresArray;
@@ -150,7 +151,7 @@ public class LinearRegression extends Classifier{
 		double prediction = tetas[0];
 		
 		for(int i = 1; i < tetas.length; i++) {
-			prediction += tetas[i] + instance.value(numOfFeature);
+			prediction += tetas[i] * instance.value(numOfFeature);
 			numOfFeature++;
 		}
 

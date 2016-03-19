@@ -25,7 +25,7 @@ public class MainHW1 {
 		return inputReader;
 	}
 	
-	public Instances generate1DLinData(int numInstances) {
+	public static Instances generate1DLinData(int numInstances) {
 		Attribute Attribute1 = new Attribute("x");
 		Attribute ClassAttribute = new Attribute("y");
 		FastVector fvWekaAttributes = new FastVector(2);
@@ -53,7 +53,7 @@ public class MainHW1 {
 	 * @return Instances data
 	 * @throws IOException
 	 */
-	public Instances loadData(String fileName) throws IOException{
+	public static Instances loadData(String fileName) throws IOException{
 		BufferedReader datafile = readDataFile(fileName);
 
 		Instances data = new Instances(datafile);
@@ -63,10 +63,18 @@ public class MainHW1 {
 	
 	public static void main(String[] args) throws Exception {
 		//load data
-		
+		Instances trainingData = loadData("/Users/arnonnir/Documents/workspace/HomeWork1/src/homework1/housing_testing.txt");
 		//train classifier
-		
+		LinearRegression linearRegression = new LinearRegression();
+		linearRegression.buildClassifier(trainingData);
 		//calculate error
+		toStringTetas(linearRegression.m_coefficients);
+	}
+	
+	public static void toStringTetas(double[] tetas) {
+		for(int i = 0; i < tetas.length; i++) {
+			System.out.print(tetas[i] + " ");
+		}
 	}
 
 }
