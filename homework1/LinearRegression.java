@@ -138,13 +138,14 @@ public class LinearRegression extends Classifier{
 
 	private double calculateError(Instance instance, double[] tetas) {
 		int numOfFeature = 0;
-		double prediction = 0;
+		double prediction = tetas[0];
+		
 		for(int i = 1; i < tetas.length; i++) {
-			prediction += tetas[1] + instance.value(numOfFeature);
+			prediction += tetas[i] + instance.value(numOfFeature);
 			numOfFeature++;
 		}
 
-		double classValue = instance.classValue(); // check if it's really the "cost" value of the instance
+		double classValue = instance.classValue();
 		double error = Math.pow((prediction - classValue), 2);
 
 		return error;
