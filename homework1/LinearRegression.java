@@ -19,13 +19,41 @@ public class LinearRegression extends Classifier{
 		m_ClassIndex = trainingData.classIndex();
 		//since class attribute is also an attribuite we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
-		setAlpha();
+		setAlpha(trainingData);
 		m_coefficients = gradientDescent(trainingData);
 
 	}
 
-	private void setAlpha(){
-
+	private void setAlpha(Instances trainingData){
+		int numberOfInstances = trainingData.numInstances();
+		double[] tetas = new double[m_truNumAttributes + 1];
+		
+		for(int i = 0; i < tetas.length; i++) {
+			tetas[i] = 1;
+		}
+		
+		int powerOfError = -17;
+		double minError = Double.MAX_VALUE;
+		
+		for(int i = -17; i < 2; i++) {
+			
+			double alpha = Math.pow(3, i);
+			double error = 0;
+			
+			for(int j = 0; j < 20000; j++) {
+				for(int k = 0; k < numberOfInstances; k++) {
+					Instance currentInstance = trainingData.instance(k);
+					error += calculateError(currentInstance, tetas);
+				}
+			}
+			
+			if(error < minError) {
+				minError = error;
+				powerOfError = i;
+			}
+		}
+		
+		m_alpha = Math.pow(3, powerOfError);
 	}
 
 	/**
@@ -37,19 +65,46 @@ public class LinearRegression extends Classifier{
 	 * @throws Exception
 	 */
 	public double[] gradientDescent(Instances trainingData) throws Exception {
+		int numberOfInstances = trainingData.numInstances();
 		double[] tetas = new double[m_truNumAttributes + 1];
+		
 		for(int i = 0; i < tetas.length; i++) {
 			tetas[i] = 1;
 		}
+		
+		boolean toContinue = true;
+		double prevErrorResult = Double.MAX_VALUE; // ensure that will be more then one of 100 iterations of the algorithm
+		double currentErrorResult = 0;
+		
+		while(toContinue) {
+			for(int i = 0; i < 100; i++) {
+				tetas = iterationInGradientDescent(trainingData, tetas);
+			}
+			
+			double sumError = 0;
+			
+			for(int i = 0; i < numberOfInstances; i++) {
+				Instance currentInstance = trainingData.instance(i);
+				sumError += calculateError(currentInstance, tetas);
+			}
+			
+			currentErrorResult = (1 / (2 * numberOfInstances)) * sumError;
+			
+			if(Math.abs(prevErrorResult - currentErrorResult) < 0.003) {
+				toContinue = false;
+			}else {
+				prevErrorResult = currentErrorResult;
+				currentErrorResult = 0;
+			}
+			
+		}
 
 
-
-		return null;
+		return tetas;
 	}
 
 	private double[] iterationInGradientDescent(Instances instances, double[] tetas) {
 		int numberOfInstances = instances.numInstances();
-		int numberOfFeatures = instances.instance(0).numValues();
 		int numberOfTetas = tetas.length;
 		double[] newTetas = new double[numberOfTetas];
 		
@@ -58,8 +113,8 @@ public class LinearRegression extends Classifier{
 			
 			for(int i = 0; i < numberOfInstances; i++) {
 				Instance currentInstance = instances.instance(i);
-				double[] currentFeature = copyFeaturesToArray(currentInstance);
-				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeature[j];
+				double[] currentFeatures = copyFeaturesToArray(currentInstance);
+				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j];
 			}
 			
 			newTetas[j] = tetas[j] - (m_alpha * (1/numberOfInstances) * sumError);
@@ -91,7 +146,6 @@ public class LinearRegression extends Classifier{
 
 		double classValue = instance.classValue(); // check if it's really the "cost" value of the instance
 		double error = Math.pow((prediction - classValue), 2);
-
 
 		return error;
 	}
