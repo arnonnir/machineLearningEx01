@@ -63,7 +63,7 @@ public class MainHW1 {
 	
 	public static void main(String[] args) throws Exception {
 		//load data
-		Instances trainingData = loadData("/Users/arnonnir/Documents/workspace/HomeWork1/src/homework1/housing_testing.txt");
+		Instances trainingData = loadData("/Users/arnonnir/Documents/workspace/HomeWork1/src/homework1/housing_training.txt");
 		//train classifier
 		LinearRegression linearRegression = new LinearRegression();
 		linearRegression.buildClassifier(trainingData);
@@ -75,6 +75,7 @@ public class MainHW1 {
 		for(int i = 0; i < tetas.length; i++) {
 			System.out.print(tetas[i] + " ");
 		}
+		
 	}
 
 }

@@ -21,6 +21,7 @@ public class LinearRegression extends Classifier{
 		m_truNumAttributes = trainingData.numAttributes() - 1;
 		setAlpha(trainingData);
 		m_coefficients = gradientDescent(trainingData);
+		System.out.println(m_alpha);
 
 	}
 
@@ -44,7 +45,7 @@ public class LinearRegression extends Classifier{
 				error += calculateError(currentInstance, tetas);
 			}
 			
-			error = (1 / (2 * numberOfInstances)) * error;
+			error = ((double)1 / (double)(2 * numberOfInstances)) * error;
 			
 			if(error < minError) {
 				minError = error;
@@ -97,7 +98,7 @@ public class LinearRegression extends Classifier{
 				sumError += calculateError(currentInstance, tetas);
 			}
 			
-			currentErrorResult = (1 / (2 * numberOfInstances)) * sumError;
+			currentErrorResult = ((double)1 / (double)(2 * numberOfInstances)) * sumError;
 			
 			if(Math.abs(prevErrorResult - currentErrorResult) < 0.003) {
 				toContinue = false;
@@ -125,7 +126,7 @@ public class LinearRegression extends Classifier{
 				double[] currentFeatures = copyFeaturesToArray(currentInstance);
 				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j];
 			}
-			float e = (float)(m_alpha * (1/numberOfInstances) * sumError);
+			double e = (m_alpha * ((double)1/(double)numberOfInstances) * sumError);
 			newTetas[j] = tetas[j] - e;
 		}
 		
