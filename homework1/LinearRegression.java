@@ -21,7 +21,6 @@ public class LinearRegression extends Classifier{
 		m_truNumAttributes = trainingData.numAttributes() - 1;
 		setAlpha(trainingData);
 		m_coefficients = gradientDescent(trainingData);
-		System.out.println(m_alpha);
 
 	}
 
@@ -42,10 +41,14 @@ public class LinearRegression extends Classifier{
 			
 			for(int k = 0; k < numberOfInstances; k++) {
 				Instance currentInstance = trainingData.instance(k);
-				error += calculateError(currentInstance, tetas);
+				try {
+					error += calculateError(currentInstance, tetas);
+				} catch (Exception e) {
+					System.out.println("There is a problem to calculate the error");
+				}
 			}
 			
-			error = ((double)1 / (double)(2 * numberOfInstances)) * error;
+			error = error / (double)numberOfInstances;
 			
 			if(error < minError) {
 				minError = error;
@@ -54,6 +57,7 @@ public class LinearRegression extends Classifier{
 		}
 		
 		m_alpha = Math.pow(3, powerOfError);
+		System.out.println("alpha is: 3^" + powerOfError);
 	}
 	
 	private double[] initialTetasArray() {
@@ -91,14 +95,9 @@ public class LinearRegression extends Classifier{
 				tetas = iterationInGradientDescent(trainingData, tetas);
 			}
 			
-			double sumError = 0;
+			currentErrorResult = calculateSE(trainingData, tetas) / (double)numberOfInstances;
 			
-			for(int i = 0; i < numberOfInstances; i++) {
-				Instance currentInstance = trainingData.instance(i);
-				sumError += calculateError(currentInstance, tetas);
-			}
-			
-			currentErrorResult = ((double)1 / (double)(2 * numberOfInstances)) * sumError;
+			System.out.println("prev Error: " + prevErrorResult + "   ,   current Error: " + currentErrorResult + "   ,   gap: " + (prevErrorResult - currentErrorResult));
 			
 			if(Math.abs(prevErrorResult - currentErrorResult) < 0.003) {
 				toContinue = false;
@@ -109,7 +108,6 @@ public class LinearRegression extends Classifier{
 			
 		}
 
-
 		return tetas;
 	}
 
@@ -119,14 +117,18 @@ public class LinearRegression extends Classifier{
 		double[] newTetas = new double[numberOfTetas];
 		
 		for(int j = 0; j < numberOfTetas; j++) {
-			double sumError = 0;
+			double sumError = 0.0;
 			
 			for(int i = 0; i < numberOfInstances; i++) {
 				Instance currentInstance = instances.instance(i);
 				double[] currentFeatures = copyFeaturesToArray(currentInstance);
-				sumError += Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j];
+				try {
+					sumError += (Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j]);
+				} catch (Exception e1) {
+					System.out.println("There is a problem to calculate the error");
+				}
 			}
-			double e = (m_alpha * ((double)1/(double)numberOfInstances) * sumError);
+			double e = (m_alpha * sumError / (double)numberOfInstances);
 			newTetas[j] = tetas[j] - e;
 		}
 		
@@ -147,19 +149,10 @@ public class LinearRegression extends Classifier{
 		return featuresArray;
 	}
 
-	private double calculateError(Instance instance, double[] tetas) {
-		int numOfFeature = 0;
-		double prediction = tetas[0];
-		
-		for(int i = 1; i < tetas.length; i++) {
-			prediction += tetas[i] * instance.value(numOfFeature);
-			numOfFeature++;
-		}
-
+	private double calculateError(Instance instance, double[] tetas) throws Exception {
 		double classValue = instance.classValue();
-		double error = Math.pow((prediction - classValue), 2);
-
-		return error;
+		
+		return Math.pow((regressionPrediction(instance, tetas) - classValue), 2);
 	}
 
 	/**
@@ -171,7 +164,15 @@ public class LinearRegression extends Classifier{
 	 * @throws Exception
 	 */
 	public double regressionPrediction(Instance instance, double[] coefficients) throws Exception {
-		return 0;
+		double prediction = coefficients[0];
+		for (int i = 0; i < m_truNumAttributes; i++) {
+			if (instance.classIndex() != i) {
+				prediction += instance.value(i) * coefficients[i + 1];
+			}
+			
+		}
+		
+		return prediction;
 	}
 
 	/**
@@ -183,8 +184,13 @@ public class LinearRegression extends Classifier{
 	 * @throws Exception
 	 */
 	public double calculateSE(Instances testData, double[] coefficients) throws Exception {
-
-		return 0;
+		double totalError = 0;
+		int numOfInstances = testData.numInstances();
+		for (int i = 0; i < numOfInstances; i++) {
+			totalError += calculateError(testData.instance(i), coefficients);
+		}
+		
+		return totalError;
 	}
 
 	/**
