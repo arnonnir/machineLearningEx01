@@ -1,5 +1,7 @@
 package homework1;
 
+import java.util.Random;
+
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -8,7 +10,7 @@ public class LinearRegression extends Classifier{
 
 	private int m_ClassIndex;
 	private int m_truNumAttributes;
-	public double[] m_coefficients;
+	private double[] m_coefficients;
 	private double m_alpha;
 
 	//the method which runs to train the linear regression predictor, i.e.
@@ -19,15 +21,21 @@ public class LinearRegression extends Classifier{
 		m_ClassIndex = trainingData.classIndex();
 		//since class attribute is also an attribuite we subtract 1
 		m_truNumAttributes = trainingData.numAttributes() - 1;
+		randomShuffle(trainingData);
 		setAlpha(trainingData);
 		m_coefficients = gradientDescent(trainingData);
 
 	}
 
+	private void randomShuffle(Instances trainingData) {
+		Random random = new Random();
+		trainingData.randomize(random);
+	}
+
 	private void setAlpha(Instances trainingData){
 		int numberOfInstances = trainingData.numInstances();
 		
-		int powerOfError = -17;
+		double powerOfError = -17;
 		double minError = Double.MAX_VALUE;
 		
 		for(int i = -17; i < 2; i++) {
@@ -42,7 +50,7 @@ public class LinearRegression extends Classifier{
 			for(int k = 0; k < numberOfInstances; k++) {
 				Instance currentInstance = trainingData.instance(k);
 				try {
-					error += calculateError(currentInstance, tetas);
+					error += Math.pow(calculateError(currentInstance, tetas), 2);
 				} catch (Exception e) {
 					System.out.println("There is a problem to calculate the error");
 				}
@@ -79,7 +87,6 @@ public class LinearRegression extends Classifier{
 	 * @throws Exception
 	 */
 	public double[] gradientDescent(Instances trainingData) throws Exception {
-		int numberOfInstances = trainingData.numInstances();
 		double[] tetas = new double[m_truNumAttributes + 1];
 		
 		for(int i = 0; i < tetas.length; i++) {
@@ -95,9 +102,7 @@ public class LinearRegression extends Classifier{
 				tetas = iterationInGradientDescent(trainingData, tetas);
 			}
 			
-			currentErrorResult = calculateSE(trainingData, tetas) / (double)numberOfInstances;
-			
-			System.out.println("prev Error: " + prevErrorResult + "   ,   current Error: " + currentErrorResult + "   ,   gap: " + (prevErrorResult - currentErrorResult));
+			currentErrorResult = calculateSE(trainingData, tetas);
 			
 			if(Math.abs(prevErrorResult - currentErrorResult) < 0.003) {
 				toContinue = false;
@@ -123,7 +128,7 @@ public class LinearRegression extends Classifier{
 				Instance currentInstance = instances.instance(i);
 				double[] currentFeatures = copyFeaturesToArray(currentInstance);
 				try {
-					sumError += (Math.sqrt(calculateError(currentInstance, tetas)) * currentFeatures[j]);
+					sumError += calculateError(currentInstance, tetas) * currentFeatures[j];
 				} catch (Exception e1) {
 					System.out.println("There is a problem to calculate the error");
 				}
@@ -152,7 +157,7 @@ public class LinearRegression extends Classifier{
 	private double calculateError(Instance instance, double[] tetas) throws Exception {
 		double classValue = instance.classValue();
 		
-		return Math.pow((regressionPrediction(instance, tetas) - classValue), 2);
+		return regressionPrediction(instance, tetas) - classValue;
 	}
 
 	/**
@@ -187,10 +192,10 @@ public class LinearRegression extends Classifier{
 		double totalError = 0;
 		int numOfInstances = testData.numInstances();
 		for (int i = 0; i < numOfInstances; i++) {
-			totalError += calculateError(testData.instance(i), coefficients);
+			totalError += Math.pow(calculateError(testData.instance(i), coefficients), 2);
 		}
 		
-		return totalError;
+		return totalError / (double)numOfInstances;
 	}
 
 	/**
@@ -204,4 +209,8 @@ public class LinearRegression extends Classifier{
 		return 0;
 	}
 
+	public double[] getCoefficients() {
+		return m_coefficients;
+		
+	}
 }

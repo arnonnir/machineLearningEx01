@@ -63,12 +63,13 @@ public class MainHW1 {
 	
 	public static void main(String[] args) throws Exception {
 		//load data
-		Instances trainingData = loadData("/Users/yakirjonasoff/Downloads/homework1/housing_testing1.txt");
+		Instances trainingData = loadData("/Users/yakirjonasoff/Downloads/homework1/housing_training.txt");
 		//train classifier
 		LinearRegression linearRegression = new LinearRegression();
 		linearRegression.buildClassifier(trainingData);
 		//calculate error
-		toStringTetas(linearRegression.m_coefficients);
+		toStringTetas(linearRegression.getCoefficients());
+		System.out.println(linearRegression.calculateSE(trainingData, linearRegression.getCoefficients()));
 	}
 	
 	public static void toStringTetas(double[] tetas) {
